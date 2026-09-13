@@ -67,21 +67,27 @@ Keep this as a four-stage pipeline diagram in the README (it mirrors the in-app 
 ## Models used in the platform
 
 **1. Exploration Prospectivity Engine**
-Ensemble Random Forest + multi-criteria spatial evidence weighting. Inputs: Sentinel-2 SWIR/VNIR band ratios, SRTM slope/topographic wetness index, distance to structural lineaments, lithological contact proximity, proximity to known occurrences. Output: a 0–1 favorability score + confidence %, explained via SHAP-style contribution shares. Cited validation: AUC-ROC 0.89 against known GSI occurrences (this is a *simulated* benchmark, not a real trained/evaluated model — worth knowing before a judge asks).
+
+*Ensemble Random Forest* + multi-criteria spatial evidence weighting. Inputs: Sentinel-2 SWIR/VNIR band ratios, SRTM slope/topographic wetness index, distance to structural lineaments, lithological contact proximity, proximity to known occurrences. Output: a 0–1 favorability score + confidence %, explained via SHAP-style contribution shares. Cited validation: AUC-ROC 0.89 against known GSI occurrences (this is a *simulated* benchmark, not a real trained/evaluated model — worth knowing before a judge asks).
 
 **2. Resource & Tonnage Estimation Engine**
-3D spatial regression (XGBoost) benchmarked against Ordinary Kriging geostatistics. Inputs: drillhole XYZ + assay intervals, specific gravity, structural boundary constraints. Output: P10/P50/P90 tonnage and grade range. Cited validation: Kriging cross-validation R²=0.81, 22% variance reduction over univariate interpolation.
+
+*3D spatial regression (XGBoost)* benchmarked against Ordinary Kriging geostatistics. Inputs: drillhole XYZ + assay intervals, specific gravity, structural boundary constraints. Output: P10/P50/P90 tonnage and grade range. Cited validation: Kriging cross-validation R²=0.81, 22% variance reduction over univariate interpolation.
 
 **3. Production Shortfall Forecasting Engine**
-Gradient-boosted time-series regressor (LightGBM-style) with weather as an exogenous regressor. Inputs: shift production actuals, equipment availability %, blasting delay backlog, CHIRPS rainfall forecast. Output: month-end forecast + LOW/MED/HIGH shortfall risk, explained via causal factor decomposition. Cited validation: MAPE 4.2% on simulated test sets.
+
+*Gradient-boosted time-series regressor (LightGBM-style)* with weather as an exogenous regressor. Inputs: shift production actuals, equipment availability %, blasting delay backlog, CHIRPS rainfall forecast. Output: month-end forecast + LOW/MED/HIGH shortfall risk, explained via causal factor decomposition. Cited validation: MAPE 4.2% on simulated test sets.
 
 **4. Scenario & What-If Simulation Engine**
+
 Not ML — constrained rule-based/operational optimization with physical bounds (equipment 60–95%, blasting delay 2–24h, etc.). Deterministic recompute, not a trained model.
 
 **5. Corrective Action Recommendation Engine**
+
 Multi-objective utility ranking (Impact × Confidence × Feasibility ÷ Urgency). Also rule-based, not ML — explicitly "no ungrounded AI generative text," human-in-the-loop approval required.
 
 **6. Conversational layer (separate from the above)**
+
 Google Gemini via `@google/genai` — tries `gemini-3.5-flash` first, falls back to `gemini-3.1-flash-lite`, with an offline hand-written "domain telemetry" responder when no API key or the API fails. This is the only component actually calling a live foundation model; the five modules above are architecturally specified but run on fixture data, not trained weights.
 
 **Important distinction to be ready for:** modules 1–3 are *designed* as ML pipelines with named algorithms and cited metrics, but the repo has no training code, no model artifacts, and no real evaluation — the "validation baselines" (AUC 0.89, R²=0.81, MAPE 4.2%) are illustrative numbers in a fixture file, not measured results. Know this cold, because it's the single most likely thing a technical judge will probe.
