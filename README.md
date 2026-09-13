@@ -63,3 +63,56 @@ Keep this as a four-stage pipeline diagram in the README (it mirrors the in-app 
 - **Backend:** Express server (`server.ts`) proxying the Google Gemini API (`@google/genai`) for the AI assistant, with Google Maps grounding and an offline domain-fallback engine
 - **Data layer:** typed fixture modules per domain (`explorationData`, `resourceData`, `productionData`, `scenarioData`, `recommendationData`, `systemMetadata`) so real data sources can be substituted without touching UI components
 
+
+## Models used in the platform
+
+**1. Exploration Prospectivity Engine**
+Ensemble Random Forest + multi-criteria spatial evidence weighting. Inputs: Sentinel-2 SWIR/VNIR band ratios, SRTM slope/topographic wetness index, distance to structural lineaments, lithological contact proximity, proximity to known occurrences. Output: a 0–1 favorability score + confidence %, explained via SHAP-style contribution shares. Cited validation: AUC-ROC 0.89 against known GSI occurrences (this is a *simulated* benchmark, not a real trained/evaluated model — worth knowing before a judge asks).
+
+**2. Resource & Tonnage Estimation Engine**
+3D spatial regression (XGBoost) benchmarked against Ordinary Kriging geostatistics. Inputs: drillhole XYZ + assay intervals, specific gravity, structural boundary constraints. Output: P10/P50/P90 tonnage and grade range. Cited validation: Kriging cross-validation R²=0.81, 22% variance reduction over univariate interpolation.
+
+**3. Production Shortfall Forecasting Engine**
+Gradient-boosted time-series regressor (LightGBM-style) with weather as an exogenous regressor. Inputs: shift production actuals, equipment availability %, blasting delay backlog, CHIRPS rainfall forecast. Output: month-end forecast + LOW/MED/HIGH shortfall risk, explained via causal factor decomposition. Cited validation: MAPE 4.2% on simulated test sets.
+
+**4. Scenario & What-If Simulation Engine**
+Not ML — constrained rule-based/operational optimization with physical bounds (equipment 60–95%, blasting delay 2–24h, etc.). Deterministic recompute, not a trained model.
+
+**5. Corrective Action Recommendation Engine**
+Multi-objective utility ranking (Impact × Confidence × Feasibility ÷ Urgency). Also rule-based, not ML — explicitly "no ungrounded AI generative text," human-in-the-loop approval required.
+
+**6. Conversational layer (separate from the above)**
+Google Gemini via `@google/genai` — tries `gemini-3.5-flash` first, falls back to `gemini-3.1-flash-lite`, with an offline hand-written "domain telemetry" responder when no API key or the API fails. This is the only component actually calling a live foundation model; the five modules above are architecturally specified but run on fixture data, not trained weights.
+
+**Important distinction to be ready for:** modules 1–3 are *designed* as ML pipelines with named algorithms and cited metrics, but the repo has no training code, no model artifacts, and no real evaluation — the "validation baselines" (AUC 0.89, R²=0.81, MAPE 4.2%) are illustrative numbers in a fixture file, not measured results. Know this cold, because it's the single most likely thing a technical judge will probe.
+
+## Likely judge questions
+
+**Technical / ML depth**
+
+- "Where's the trained model? Show me the training code or the notebook." — you don't have one; be upfront that this is a prototype UI/UX and architecture demonstration, with the ML pipeline specified but not yet trained on real MOIL data.
+- "How did you get an AUC of 0.89 / R² of 0.81 if there's no real drillhole data?" — same answer: these are target/illustrative benchmarks from published literature on similar prospectivity studies, not measured on this dataset.
+- "Why Random Forest over a CNN on the satellite imagery directly?" — be ready to justify: tabular/engineered spectral+spatial features are far more label-efficient than raw imagery CNNs when labeled occurrence points are scarce (which is realistic for a real MOIL deployment).
+- "How would kriging and the ML regressor actually be reconciled/blended?" — have an answer (e.g., ML residuals kriged, or ensemble weighting by local data density) even if not implemented.
+- "What's your explainability method concretely — do you actually compute SHAP values anywhere in the code?" — no, it's static contribution percentages in fixtures; say so and describe how you'd wire in real SHAP once a model is trained.
+
+**Data / feasibility**
+
+- "What real data do you actually have access to right now, vs. what needs MOIL to give you?" — you have a clean answer already (your Data Sources page draws this line explicitly).
+- "Sentinel-2/SRTM/CHIRPS are free — what's stopping anyone from building this?" — the differentiator is the integration into one continuous mining decision workflow with MOIL-specific domain logic, not the raw data access.
+- "How would you validate a manganese prospectivity model without labeled negative examples?" — good question to have a real answer for (spatial cross-validation, buffered occurrence sampling, etc.) since it's a known hard problem in mineral prospectivity mapping.
+- "What happens when MOIL's real drillhole/production data doesn't match your assumed schema?" — point to the typed data-layer abstraction as the answer.
+
+**Product / impact**
+
+- "Who is the actual end user — a geologist, a mine planner, or MOIL management?" — the app currently serves all three loosely; be ready to pick a primary persona.
+- "What's the cost/tonnage impact if this were deployed?" — have a rough estimate ready (e.g., "even a 5% reduction in the 3,800t monthly shortfall on this pilot mine = X tonnes/₹Y recovered").
+- "Is this compliant with UNFC/JORC reserve reporting?" — no, and the app is careful never to claim it is; explain why that distinction matters legally for MOIL.
+- "What happens without an internet connection or API key at demo time?" — you have a strong answer here (the offline fallback engine) — lead with this, it's a genuine strength.
+
+**Scalability / deployment**
+
+- "How would this scale to MOIL's other manganese belts (Balaghat isn't the only one)?" — the fixture-driven data layer is designed for this; explain the swap-in path.
+- "Where would this run in production — cloud, on-prem, air-gapped?" — the in-app architecture note mentions "sovereign cloud infrastructure" for National Geospatial Policy compliance; be ready to expand on that.
+
+
