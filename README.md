@@ -63,4 +63,3 @@ Keep this as a four-stage pipeline diagram in the README (it mirrors the in-app 
 - **Backend:** Express server (`server.ts`) proxying the Google Gemini API (`@google/genai`) for the AI assistant, with Google Maps grounding and an offline domain-fallback engine
 - **Data layer:** typed fixture modules per domain (`explorationData`, `resourceData`, `productionData`, `scenarioData`, `recommendationData`, `systemMetadata`) so real data sources can be substituted without touching UI components
 
-*
