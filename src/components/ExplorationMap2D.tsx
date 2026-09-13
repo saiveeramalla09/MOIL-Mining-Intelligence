@@ -435,7 +435,7 @@ export const ExplorationMap2D: React.FC<ExplorationMap2DProps> = ({
   }, []);
 
   return (
-    <div className="relative w-full h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#f5f4f0] overflow-hidden">
+    <div className="relative z-0 w-full h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#f5f4f0] overflow-hidden">
       {/* Top Left Basemap Selector */}
       <div className="absolute top-3 left-12 z-[900] bg-white/95 backdrop-blur-xs border border-stone-300 rounded shadow-xs p-1 flex items-center space-x-1">
         <button

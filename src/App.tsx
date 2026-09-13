@@ -18,7 +18,7 @@ import { EXPLORATION_TARGETS, DRILLHOLES } from './data/explorationData';
 import { ExplorationTarget, WorkflowStep } from './types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<MainTab>('overview');
+  const [activeTab, setActiveTab] = useState<MainTab>('landing');
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget>(EXPLORATION_TARGETS[0]);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);

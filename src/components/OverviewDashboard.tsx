@@ -328,7 +328,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         {/* Map Canvas and Target Highlights */}
         <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Map canvas (8 cols) - Adaptive to aspect ratio */}
-          <div className="lg:col-span-8 h-[340px] sm:h-[400px] md:h-[440px] lg:h-[480px] relative border-b lg:border-b-0 lg:border-r border-stone-200">
+          <div className="lg:col-span-8 h-[340px] sm:h-[400px] md:h-[440px] lg:h-[480px] relative z-0 border-b lg:border-b-0 lg:border-r border-stone-200">
             <div ref={mapContainerRef} className="w-full h-full" />
             
             {/* Map Legend Overlay */}
