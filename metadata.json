@@ -1,0 +1,6 @@
+{
+  "name": "MOIL Mining Intelligence",
+  "description": "AI-powered exploration and production decision support for manganese mining (Balaghat–Nagpur Pilot, SIH26009).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
