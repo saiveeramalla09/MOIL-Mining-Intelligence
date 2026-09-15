@@ -28,7 +28,7 @@ export const AiAssistantSidebar: React.FC<AiAssistantProps> = ({
     {
       id: 'welcome-1',
       role: 'model',
-      content: 'Hello! I am your MOIL Mining decision assistant. Ask me anything about manganese deposits, production targets, or mining coordinates.',
+      content: 'Hello! I am your MANGANEX decision assistant. Ask me anything about manganese deposits, production targets, or mining coordinates.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -184,7 +184,7 @@ export const AiAssistantSidebar: React.FC<AiAssistantProps> = ({
           </div>
           <div>
             <div className="font-semibold text-xs text-white leading-tight flex items-center gap-1.5">
-              <span>MOIL Assistant</span>
+              <span>MANGANEX Assistant</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
             </div>
             <div className="text-[10px] text-stone-300 font-mono">

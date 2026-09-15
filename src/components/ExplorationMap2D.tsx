@@ -435,9 +435,9 @@ export const ExplorationMap2D: React.FC<ExplorationMap2DProps> = ({
   }, []);
 
   return (
-    <div className="relative w-full h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#f5f4f0] overflow-hidden">
+    <div className="relative isolate z-0 w-full h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#f5f4f0] overflow-hidden">
       {/* Top Left Basemap Selector */}
-      <div className="absolute top-3 left-12 z-[900] bg-white/95 backdrop-blur-xs border border-stone-300 rounded shadow-xs p-1 flex items-center space-x-1">
+      <div className="absolute top-3 left-12 z-25 bg-white/95 backdrop-blur-xs border border-stone-300 rounded shadow-xs p-1 flex items-center space-x-1">
         <button
           onClick={() => handleSwitchBasemap('topo')}
           className={`px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
@@ -474,7 +474,7 @@ export const ExplorationMap2D: React.FC<ExplorationMap2DProps> = ({
       </div>
 
       {/* Top Right Coordinate / Datum HUD */}
-      <div className="absolute top-3 right-3 z-[900] bg-white/95 backdrop-blur-xs border border-stone-300 px-3 py-1.5 rounded text-[11px] font-mono text-stone-600 shadow-xs pointer-events-none flex items-center space-x-2">
+      <div className="absolute top-3 right-3 z-25 bg-white/95 backdrop-blur-xs border border-stone-300 px-3 py-1.5 rounded text-[11px] font-mono text-stone-600 shadow-xs pointer-events-none flex items-center space-x-2">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
         <span className="font-sans font-medium text-stone-800">Balaghat–Nagpur Belt</span>
         <span className="text-stone-300">|</span>

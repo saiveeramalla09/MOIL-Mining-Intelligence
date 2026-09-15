@@ -53,12 +53,42 @@
   background: #a8a29e;
 }
 
-/* Leaflet Geological Map Overrides (Muted GIS styling) */
+/* Leaflet Geological Map Overrides (Muted GIS styling & strict z-index containment) */
 .leaflet-container {
   width: 100%;
   height: 100%;
   background: #f5f4f0 !important;
   font-family: inherit;
+}
+
+/* Ensure Leaflet panes and controls never overlap sticky navbar (z-50) or modals */
+.leaflet-pane {
+  z-index: 10 !important;
+}
+.leaflet-tile-pane {
+  z-index: 10 !important;
+}
+.leaflet-overlay-pane {
+  z-index: 12 !important;
+}
+.leaflet-shadow-pane {
+  z-index: 13 !important;
+}
+.leaflet-marker-pane {
+  z-index: 14 !important;
+}
+.leaflet-tooltip-pane {
+  z-index: 15 !important;
+}
+.leaflet-popup-pane {
+  z-index: 16 !important;
+}
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 20 !important;
+}
+.leaflet-control {
+  z-index: 20 !important;
 }
 
 .leaflet-bar {

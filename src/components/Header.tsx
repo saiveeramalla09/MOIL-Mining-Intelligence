@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Compass, 
   Layers, 
@@ -10,8 +10,7 @@ import {
   Cpu, 
   GitBranch, 
   FileText,
-  ChevronRight,
-  Info,
+  ChevronDown,
   Menu,
   X,
   Sparkles
@@ -46,11 +45,27 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleAiAssistant,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close sidebar on Esc
+  // Close "More" dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setIsMoreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setIsMoreOpen(false);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -68,223 +83,204 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [isMobileMenuOpen]);
 
-  const primaryTabs: { id: MainTab; label: string; icon: React.FC<{ className?: string }>; question: string; step?: number }[] = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard, question: 'What needs attention?' },
-    { id: 'exploration', label: 'Exploration', icon: Compass, question: 'Where to investigate?', step: 1 },
-    { id: 'resource', label: 'Resource', icon: Layers, question: 'What could be there?', step: 2 },
-    { id: 'production', label: 'Production', icon: TrendingUp, question: 'Will we meet target?', step: 3 },
-    { id: 'scenarios', label: 'Scenarios', icon: Sliders, question: 'What if we change?', step: 4 },
-    { id: 'actions', label: 'Actions', icon: CheckSquare, question: 'What should we do?', step: 5 },
+  // Primary navigation: exactly in this order
+  const primaryTabs: { id: MainTab; label: string; icon: React.FC<{ className?: string }> }[] = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'exploration', label: 'Explore', icon: Compass },
+    { id: 'resource', label: 'Resource', icon: Layers },
+    { id: 'production', label: 'Production', icon: TrendingUp },
+    { id: 'scenarios', label: 'Scenarios', icon: Sliders },
+    { id: 'actions', label: 'Actions', icon: CheckSquare },
   ];
 
+  // Secondary technical navigation grouped inside "More ▾"
   const secondaryTabs: { id: MainTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'datasources', label: 'Data Sources', icon: Database },
-    { id: 'modelcenter', label: 'Model Center', icon: Cpu },
-    { id: 'architecture', label: 'Architecture', icon: GitBranch },
-    { id: 'sihmatrix', label: 'SIH Matrix', icon: FileText },
+    { id: 'datasources', label: 'Data & Sources', icon: Database },
+    { id: 'modelcenter', label: 'Models & Validation', icon: Cpu },
+    { id: 'architecture', label: 'System Architecture', icon: GitBranch },
+    { id: 'sihmatrix', label: 'SIH Problem Alignment', icon: FileText },
   ];
 
-  const currentActiveTabObj = 
-    primaryTabs.find((t) => t.id === activeTab) || 
-    secondaryTabs.find((t) => t.id === activeTab);
+  const isSecondaryActive = secondaryTabs.some((t) => t.id === activeTab);
 
   const handleSelectTab = (tab: MainTab) => {
     onSelectTab(tab);
     setIsMobileMenuOpen(false);
+    setIsMoreOpen(false);
   };
 
   return (
-    <header className="bg-white border-b border-stone-200 sticky top-0 z-50 select-none shadow-xs">
-      {/* Top corporate & pilot status bar */}
-      <div className="px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between border-b border-stone-100 bg-[#faf9f6] text-xs">
-        <div className="flex items-center space-x-3">
-          {/* Mobile 3-Lines Hamburger Menu Button */}
+    <header className="bg-white border-b border-stone-200/90 sticky top-0 z-[1100] select-none w-full shadow-2xs">
+      {/* 
+        THREE-ZONE BALANCED ENTERPRISE HEADER
+        Zone 1 (Left): Brand + DEMO MODE indicator
+        Zone 2 (Center): Primary Navigation (Overview, Explore, Resource, Production, Scenarios, Actions)
+        Zone 3 (Right): More ▾ + Ask MANGANEX
+        Guarantees zero overlapping at any screen width.
+      */}
+      <div className="w-full px-3 sm:px-5 lg:px-6 py-2.5 flex items-center justify-between gap-3 xl:gap-4">
+        
+        {/* ======================================================== */}
+        {/* ZONE 1 (LEFT): BRAND IDENTITY & DEMO MODE BADGE          */}
+        {/* ======================================================== */}
+        <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+          {/* Mobile Drawer Menu Button (<lg) */}
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 -ml-1 rounded-xl text-stone-700 hover:text-stone-950 hover:bg-stone-200/70 border border-stone-200/80 transition-colors cursor-pointer flex items-center justify-center bg-white shadow-2xs"
-            aria-label="Open navigation sidebar"
-            title="Open navigation menu (3 lines)"
+            className="lg:hidden p-2 -ml-1 rounded-lg text-stone-700 hover:text-stone-950 hover:bg-stone-100 border border-stone-200 transition-colors cursor-pointer flex items-center justify-center bg-white shrink-0"
+            aria-label="Open navigation menu"
+            title="Open navigation menu"
           >
             <Menu className="w-5 h-5 text-stone-800" />
           </button>
 
           <button 
             onClick={onOpenLanding}
-            className="flex items-center space-x-2.5 text-left group hover:opacity-90 transition-opacity cursor-pointer"
-            title="Return to Welcome Overview"
+            className="flex items-center space-x-2.5 sm:space-x-3 text-left group cursor-pointer shrink-0"
+            title="MANGANEX &bull; Return to Welcome Overview"
           >
-            {/* Manganese / Raw Ochre ore mark */}
-            <div className="w-7 h-7 rounded-lg bg-[#b45309] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs">
+            {/* Ochre manganese ore insignia */}
+            <div className="w-8 h-8 rounded-lg bg-[#b45309] text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-xs shrink-0 group-hover:bg-[#92400e] transition-colors">
               M
             </div>
-            <div>
-              <div className="font-semibold text-stone-900 flex items-center gap-2 text-xs sm:text-[13px] tracking-tight">
-                MOIL Mining Intelligence
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-100 text-stone-600 font-mono border border-stone-200 hidden md:inline-block">
-                  SIH26009
+            <div className="shrink-0">
+              <div className="flex items-center space-x-2">
+                <span className="font-bold tracking-tight text-stone-950 text-base leading-none">MANGANEX</span>
+                
+                {/* DEMO MODE: integrated cleanly with brand area, never competing with nav */}
+                <span 
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-900 font-mono text-[10px] font-semibold shrink-0"
+                  title="DEMO MODE: Public EO + Simulated Operational Data"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>DEMO MODE</span>
                 </span>
               </div>
-              <div className="text-[11px] text-stone-500 font-normal truncate max-w-[170px] sm:max-w-none">
-                Balaghat–Nagpur Manganese Belt &bull; Ministry of Steel
+              <div className="text-[11px] text-stone-500 font-normal leading-tight mt-0.5 whitespace-nowrap">
+                Proposed AI Decision-Support Platform for MOIL
               </div>
             </div>
           </button>
+        </div>
 
-          {/* Mobile active tab pill */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-medium border border-stone-200 transition-colors cursor-pointer"
-            title="Switch module"
+        {/* ======================================================== */}
+        {/* ZONE 2 (CENTER): PRIMARY WORKFLOW NAVIGATION             */}
+        {/* ======================================================== */}
+        <div className="hidden lg:flex items-center justify-center flex-1 px-2 min-w-0">
+          <nav 
+            className="flex items-center space-x-0.5 xl:space-x-1 p-1 rounded-xl bg-stone-100/80 border border-stone-200/80 shrink-0"
+            aria-label="Primary Workflow Navigation"
           >
-            <span className="max-w-[85px] truncate">{currentActiveTabObj?.label}</span>
-            <ChevronRight className="w-3 h-3 text-stone-400 rotate-90 shrink-0" />
-          </button>
-
-          <div className="hidden lg:flex items-center text-stone-400 pl-3 border-l border-stone-200 text-[11px] font-sans">
-            <span className="text-stone-500">Explore &bull; Estimate &bull; Predict &bull; Act</span>
-          </div>
+            {primaryTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  id={`nav-tab-${tab.id}`}
+                  onClick={() => handleSelectTab(tab.id)}
+                  className={`flex items-center space-x-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'bg-stone-900 text-white font-semibold shadow-xs'
+                      : 'text-stone-600 hover:text-stone-950 hover:bg-white/90'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-300' : 'text-stone-500'}`} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Global DEMO MODE indicator */}
-        <div className="flex items-center space-x-2.5 mt-1 sm:mt-0">
-          <div className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-amber-50/90 border border-amber-200 text-amber-800 font-mono text-[11px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-            <span className="font-bold tracking-wide">DEMO MODE</span>
-            <span className="text-[10px] text-amber-700 hidden sm:inline">&bull; SIMULATED DATA</span>
-          </div>
-
-          <div className="hidden xl:flex items-center space-x-1.5 text-[11px] text-stone-600 bg-stone-100/80 px-2.5 py-0.5 rounded-full border border-stone-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-            <span className="font-mono text-[10px]">SENTINEL-2 + SRTM</span>
-          </div>
-
-          {/* AI Assistant Global Header Toggle */}
-          {onToggleAiAssistant && (
+        {/* ======================================================== */}
+        {/* ZONE 3 (RIGHT): MORE ▾ & ASK MANGANEX                    */}
+        {/* ======================================================== */}
+        <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0 justify-end">
+          {/* MORE ▾ DROPDOWN (Supporting Pages) */}
+          <div className="relative shrink-0" ref={moreDropdownRef}>
             <button
-              id="header-ai-toggle-btn"
-              onClick={onToggleAiAssistant}
-              className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer border ${
-                isAiAssistantOpen
-                  ? 'bg-amber-100/90 text-amber-950 border-amber-300 shadow-2xs font-semibold'
-                  : 'bg-white text-stone-700 hover:text-stone-950 hover:bg-stone-100 border-stone-200 shadow-2xs'
+              id="nav-more-dropdown-btn"
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+              className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
+                isSecondaryActive || isMoreOpen
+                  ? 'bg-stone-200 text-stone-950 font-semibold border-stone-300'
+                  : 'bg-white text-stone-700 hover:text-stone-950 hover:bg-stone-50 border-stone-200/90 shadow-2xs'
               }`}
-              title="Toggle MOIL Contextual AI Assistant Panel"
+              aria-expanded={isMoreOpen}
+              aria-haspopup="true"
+              title="Supporting technical pages & system documentation"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${isAiAssistantOpen ? 'text-amber-700' : 'text-amber-600'}`} />
-              <span className="font-semibold text-[11px]">AI Assistant</span>
-              <span className={`w-1.5 h-1.5 rounded-full ${isAiAssistantOpen ? 'bg-amber-600' : 'bg-emerald-500'}`} />
+              <span>More</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isMoreOpen ? 'rotate-180 text-stone-900' : 'text-stone-500'}`} />
             </button>
-          )}
-        </div>
-      </div>
 
-      {/* Primary Workflow Navigation & Decision Tabs (Desktop & Tablet) - Hidden on Mobile in favor of 3-Lines Sidebar */}
-      <div className="hidden md:flex px-4 sm:px-6 py-1.5 items-center justify-between overflow-x-auto no-scrollbar gap-2 bg-white">
-        <nav className="flex items-center space-x-1">
-          {primaryTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                id={`nav-tab-${tab.id}`}
-                onClick={() => onSelectTab(tab.id)}
-                className={`group flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-stone-900 text-white shadow-xs'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/80'
-                }`}
+            {/* Dropdown Menu */}
+            {isMoreOpen && (
+              <div 
+                className="absolute right-0 mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-stone-200 py-1.5 z-[1200] animate-in fade-in slide-in-from-top-1 duration-150"
+                role="menu"
               >
-                {tab.step && (
-                  <span className={`text-[10px] font-mono ${
-                    isActive ? 'text-amber-300 font-bold' : 'text-stone-400'
-                  }`}>
-                    0{tab.step}
-                  </span>
-                )}
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-300' : 'text-stone-500 group-hover:text-stone-800'}`} />
-                <span>{tab.label}</span>
-                {isActive && (
-                  <span className="text-[10px] text-stone-300 hidden xl:inline font-mono">
-                    [{tab.question}]
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+                <div className="px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-stone-400 border-b border-stone-100">
+                  Supporting &amp; Technical
+                </div>
+                {secondaryTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      id={`nav-sec-${tab.id}`}
+                      onClick={() => handleSelectTab(tab.id)}
+                      className={`w-full flex items-center space-x-2.5 px-3 py-2 text-xs text-left transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-amber-50/80 text-amber-950 font-semibold'
+                          : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950'
+                      }`}
+                      role="menuitem"
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-700' : 'text-stone-500'}`} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-        {/* Workflow pipeline breadcrumb */}
-        <div className="hidden 2xl:flex items-center space-x-1 text-[11px] font-mono text-stone-500 bg-[#f7f6f2] px-3 py-1 rounded-full border border-stone-200">
-          <span className={activeTab === 'exploration' ? 'text-amber-700 font-bold' : 'text-stone-600'}>01 EXPLORE</span>
-          <ChevronRight className="w-3 h-3 text-stone-400" />
-          <span className={activeTab === 'resource' ? 'text-amber-700 font-bold' : 'text-stone-600'}>02 ESTIMATE</span>
-          <ChevronRight className="w-3 h-3 text-stone-400" />
-          <span className={activeTab === 'production' ? 'text-amber-700 font-bold' : 'text-stone-600'}>03 PREDICT</span>
-          <ChevronRight className="w-3 h-3 text-stone-400" />
-          <span className={activeTab === 'scenarios' ? 'text-amber-700 font-bold' : 'text-stone-600'}>04 SIMULATE</span>
-          <ChevronRight className="w-3 h-3 text-stone-400" />
-          <span className={activeTab === 'actions' ? 'text-amber-700 font-bold' : 'text-stone-600'}>05 ACT</span>
-        </div>
-
-        {/* Secondary Navigation & AI Intelligence Panel Toggle */}
-        <div className="flex items-center space-x-1 pl-2 border-l border-stone-200">
-          {secondaryTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                id={`nav-sec-${tab.id}`}
-                onClick={() => onSelectTab(tab.id)}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-sans flex items-center space-x-1.5 transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-stone-100 text-stone-900 font-semibold border border-stone-300'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
-                }`}
-                title={tab.label}
-              >
-                <Icon className="w-3.5 h-3.5 text-stone-500" />
-                <span className="hidden md:inline">{tab.label}</span>
-              </button>
-            );
-          })}
-
-          {/* Dedicated AI Assistant Toggle in Secondary Nav */}
+          {/* ASK MANGANEX (Single AI Assistant Entry Point) */}
           {onToggleAiAssistant && (
             <button
-              id="nav-sec-ai-assistant"
+              id="header-ask-manganex-btn"
               onClick={onToggleAiAssistant}
-              className={`ml-1 px-3 py-1.5 rounded-xl text-xs font-sans flex items-center space-x-1.5 transition-all whitespace-nowrap cursor-pointer border ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border shrink-0 ${
                 isAiAssistantOpen
-                  ? 'bg-stone-900 text-white font-semibold border-stone-900 shadow-2xs'
-                  : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200 font-medium'
+                  ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                  : 'bg-white text-stone-800 hover:text-stone-950 hover:bg-stone-50 border-stone-300 shadow-2xs'
               }`}
-              title="Toggle Contextual AI Assistant"
+              title="Toggle MANGANEX AI Assistant"
             >
               <Sparkles className={`w-3.5 h-3.5 ${isAiAssistantOpen ? 'text-amber-300' : 'text-amber-700'}`} />
-              <span>AI Panel</span>
-              <span className={`text-[9px] font-mono px-1 rounded ${
-                isAiAssistantOpen ? 'bg-stone-800 text-amber-300' : 'bg-amber-200/80 text-amber-900 font-bold'
-              }`}>
-                MAPS
-              </span>
+              <span className="font-semibold whitespace-nowrap">Ask MANGANEX</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* MOBILE SLIDE-IN SIDEBAR DRAWER ("3 LINES" MENU) */}
+      {/* ======================================================== */}
+      {/* MOBILE SLIDE-IN SIDEBAR DRAWER (<lg)                    */}
+      {/* ======================================================== */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden">
+        <div className="fixed inset-0 z-[1300] lg:hidden">
           {/* Dark Backdrop */}
           <div 
             className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-200"
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
-          {/* Sidebar Panel */}
-          <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl flex flex-col z-[101] animate-in slide-in-from-left duration-250 border-r border-stone-200">
+          {/* Sidebar Drawer Panel */}
+          <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl flex flex-col z-[1301] animate-in slide-in-from-left duration-200 border-r border-stone-200">
             {/* Sidebar Header */}
             <div className="p-4 border-b border-stone-200 bg-[#faf9f6] flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
@@ -292,8 +288,8 @@ export const Header: React.FC<HeaderProps> = ({
                   M
                 </div>
                 <div>
-                  <div className="font-bold text-stone-900 text-sm">MOIL Intelligence</div>
-                  <div className="text-[11px] text-stone-500">Balaghat–Nagpur Belt</div>
+                  <div className="font-bold text-stone-900 text-sm">MANGANEX</div>
+                  <div className="text-[11px] text-stone-500">Proposed Platform for MOIL</div>
                 </div>
               </div>
 
@@ -309,20 +305,20 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Sidebar Status Pill */}
             <div className="p-3 bg-stone-50 border-b border-stone-100 flex items-center justify-between text-xs">
               <div className="flex items-center space-x-1.5 text-amber-800 font-mono text-[11px]">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                <span className="font-semibold">DEMO &bull; SIMULATED DATA</span>
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span className="font-semibold">DEMO MODE</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-white border border-stone-200 text-stone-600 font-mono text-[10px]">
-                SIH26009
+              <span className="text-stone-500 text-[10px]">
+                Public EO + Simulated Data
               </span>
             </div>
 
             {/* Sidebar Navigation Body */}
             <div className="flex-1 overflow-y-auto p-3 space-y-4">
-              {/* Primary Workflow */}
+              {/* Primary Navigation */}
               <div>
                 <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider px-2 mb-1.5">
-                  Core Workflow
+                  Primary Navigation
                 </div>
                 <div className="space-y-1">
                   {primaryTabs.map((tab) => {
@@ -332,67 +328,24 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         key={tab.id}
                         onClick={() => handleSelectTab(tab.id)}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all text-left cursor-pointer ${
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-all text-left cursor-pointer ${
                           isActive
                             ? 'bg-stone-900 text-white shadow-xs'
                             : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950'
                         }`}
                       >
-                        <div className="flex items-center space-x-2.5">
-                          <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-stone-500'}`} />
-                          <div>
-                            <div className="font-semibold text-xs flex items-center space-x-1.5">
-                              {tab.step && (
-                                <span className={`font-mono text-[10px] ${isActive ? 'text-amber-300' : 'text-stone-400'}`}>
-                                  0{tab.step}.
-                                </span>
-                              )}
-                              <span>{tab.label}</span>
-                            </div>
-                            <div className={`text-[10px] ${isActive ? 'text-stone-300' : 'text-stone-400'}`}>
-                              {tab.question}
-                            </div>
-                          </div>
-                        </div>
-                        <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-amber-300' : 'text-stone-400'}`} />
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-stone-500'}`} />
+                        <span>{tab.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* AI Assistant Mobile Action */}
-              {onToggleAiAssistant && (
-                <div className="pt-2 border-t border-stone-200">
-                  <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider px-2 mb-1.5">
-                    Geological Intelligence
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      onToggleAiAssistant();
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                      isAiAssistantOpen
-                        ? 'bg-stone-900 text-white border-stone-900'
-                        : 'bg-amber-50 hover:bg-amber-100 text-amber-950 border-amber-200'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2.5">
-                      <Sparkles className="w-4 h-4 text-amber-600" />
-                      <span>{isAiAssistantOpen ? 'Close AI Assistant' : 'Open AI Assistant'}</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-bold">
-                      MAPS
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* System & Architecture */}
+              {/* Supporting Material (More) */}
               <div>
                 <div className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider px-2 mb-1.5">
-                  System Architecture & Docs
+                  Supporting Material
                 </div>
                 <div className="space-y-1">
                   {secondaryTabs.map((tab) => {
@@ -404,7 +357,7 @@ export const Header: React.FC<HeaderProps> = ({
                         onClick={() => handleSelectTab(tab.id)}
                         className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all text-left cursor-pointer ${
                           isActive
-                            ? 'bg-stone-200/80 text-stone-900 font-semibold'
+                            ? 'bg-stone-200 text-stone-900 font-semibold'
                             : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                         }`}
                       >
@@ -415,11 +368,31 @@ export const Header: React.FC<HeaderProps> = ({
                   })}
                 </div>
               </div>
+
+              {/* AI Assistant Mobile Action */}
+              {onToggleAiAssistant && (
+                <div className="pt-2 border-t border-stone-200">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onToggleAiAssistant();
+                    }}
+                    className={`w-full flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                      isAiAssistantOpen
+                        ? 'bg-stone-900 text-white border-stone-900'
+                        : 'bg-white hover:bg-stone-50 text-stone-800 border-stone-300 shadow-2xs'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span>Ask MANGANEX</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Sidebar Footer */}
             <div className="p-3 border-t border-stone-200 bg-[#faf9f6] text-[11px] text-stone-500 flex items-center justify-between">
-              <span>Ministry of Steel Pilot</span>
+              <span>MOIL Intelligence</span>
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);

@@ -222,6 +222,70 @@ export const ProductionWorkspace: React.FC<ProductionWorkspaceProps> = ({
         </div>
       </div>
 
+      {/* WHAT WILL HAPPEN IF WE DO NOTHING? — Executive Decision Briefing */}
+      <div className="bg-[#faf9f6] p-4.5 rounded-2xl border border-stone-300 shadow-sm space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-stone-200">
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-xs font-bold text-stone-900 uppercase tracking-wide">
+              Operational Briefing &bull; What Will Happen If We Do Nothing?
+            </span>
+          </div>
+          <span className="text-[11px] font-mono text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full font-semibold">
+            Status: Corrective Action Required
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+          {/* Question 1: Will we meet target? */}
+          <div className="bg-white p-3.5 rounded-xl border border-stone-200 space-y-1">
+            <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wide block">
+              1. Will we meet target?
+            </span>
+            <div className="text-sm font-bold text-red-600">
+              No, current trend shows 12% shortfall.
+            </div>
+            <p className="text-stone-600 text-[11px] leading-relaxed">
+              Planned target: 52,000 t &bull; Projected output: 48,200 t (-3,800 t to -6,200 t deficit).
+            </p>
+          </div>
+
+          {/* Question 2: When will it happen? */}
+          <div className="bg-white p-3.5 rounded-xl border border-stone-200 space-y-1">
+            <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wide block">
+              2. When will it happen?
+            </span>
+            <div className="text-sm font-bold text-stone-900">
+              Around Month 4.
+            </div>
+            <p className="text-stone-600 text-[11px] leading-relaxed">
+              Deficit compounds steadily; production run-rate breaches minimum recovery threshold by Month 4.
+            </p>
+          </div>
+
+          {/* Question 3: Why? */}
+          <div className="bg-white p-3.5 rounded-xl border border-stone-200 space-y-1">
+            <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wide block">
+              3. Why is it happening?
+            </span>
+            <div className="space-y-1 text-stone-800 text-[11px] font-medium pt-0.5">
+              <div className="flex items-center space-x-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                <span>Decreasing grade at Mine B</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                <span>Slower excavation at Pit 3</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                <span>Equipment maintenance delays</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Modern Workspace View Switcher Tabs */}
       <div className="bg-white px-3 py-2 rounded-xl border border-stone-200 shadow-xs flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar">

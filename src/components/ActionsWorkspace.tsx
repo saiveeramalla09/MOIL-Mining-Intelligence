@@ -21,16 +21,55 @@ interface ActionsWorkspaceProps {
   onNavigateToExploration: () => void;
 }
 
+interface ActionWithAudit extends CorrectiveRecommendation {
+  approvedBy?: string;
+  approvedAt?: string;
+}
+
 export const ActionsWorkspace: React.FC<ActionsWorkspaceProps> = ({
   onNavigateToOverview,
   onNavigateToExploration,
 }) => {
-  const [recommendations, setRecommendations] = useState<CorrectiveRecommendation[]>(INITIAL_RECOMMENDATIONS);
+  const [recommendations, setRecommendations] = useState<ActionWithAudit[]>(
+    INITIAL_RECOMMENDATIONS.map((r, idx) => ({
+      ...r,
+      // Pre-seed first one as approved with audit trail for demo completeness
+      status: idx === 0 ? 'ACCEPTED' : 'PENDING',
+      approvedBy: idx === 0 ? 'Mine Operations Manager' : undefined,
+      approvedAt: idx === 0 ? 'Today at 08:30 AM' : undefined,
+    }))
+  );
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const handleStatusChange = (id: string, newStatus: 'ACCEPTED' | 'REJECTED' | 'PENDING') => {
+  const handleApproveAction = (id: string) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setRecommendations((prev) =>
-      prev.map((rec) => (rec.id === id ? { ...rec, status: newStatus } : rec))
+      prev.map((rec) =>
+        rec.id === id
+          ? {
+              ...rec,
+              status: rec.status === 'ACCEPTED' ? 'PENDING' : 'ACCEPTED',
+              approvedBy: rec.status === 'ACCEPTED' ? undefined : 'Mine Operations Manager',
+              approvedAt: rec.status === 'ACCEPTED' ? undefined : `Today at ${timeStr}`,
+            }
+          : rec
+      )
+    );
+  };
+
+  const handleDeclineAction = (id: string) => {
+    setRecommendations((prev) =>
+      prev.map((rec) =>
+        rec.id === id
+          ? {
+              ...rec,
+              status: rec.status === 'REJECTED' ? 'PENDING' : 'REJECTED',
+              approvedBy: undefined,
+              approvedAt: undefined,
+            }
+          : rec
+      )
     );
   };
 
@@ -44,30 +83,30 @@ export const ActionsWorkspace: React.FC<ActionsWorkspaceProps> = ({
   return (
     <div className="space-y-3.5 select-none">
       {/* Top Command Bar */}
-      <div className="bg-white px-4 py-3 rounded-xs border border-stone-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white px-4 py-3 rounded-2xl border border-stone-200/90 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2 text-xs font-semibold text-stone-900">
             <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-            <span>05 CORRECTIVE ACTIONS</span>
+            <span>05 ACTIONS — WHAT SHOULD WE DO TODAY?</span>
           </div>
           <span className="text-stone-300 hidden sm:inline">|</span>
           <div className="text-xs text-stone-500 hidden sm:inline">
-            Ranked Operational Intervention Directives &bull; Marginal Yield Optimization
+            Answers: What should we do today? &bull; Concrete Shift Directives &amp; Audit Trail
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowExportModal(true)}
-            className="px-3 py-1.5 bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium rounded-xs border border-stone-300 flex items-center space-x-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-[#f7f6f2] hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl border border-stone-300 flex items-center space-x-1.5 transition-colors cursor-pointer shadow-2xs"
           >
-            <Download className="w-3.5 h-3.5 text-stone-500" />
+            <Download className="w-3.5 h-3.5 text-stone-600" />
             <span>Export Action Summary</span>
           </button>
 
           <button
             onClick={onNavigateToOverview}
-            className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xs flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
+            className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
           >
             <span>Return to Overview</span>
             <ArrowRight className="w-3.5 h-3.5 text-amber-300" />
@@ -209,36 +248,98 @@ export const ActionsWorkspace: React.FC<ActionsWorkspaceProps> = ({
                     </div>
                   </div>
 
-                  {/* Right action buttons */}
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <button
-                      onClick={() => handleStatusChange(rec.id, 'ACCEPTED')}
-                      className={`px-3 py-1.5 rounded-xs text-xs font-medium transition-all cursor-pointer flex items-center space-x-1 ${
-                        isAccepted
-                          ? 'bg-emerald-700 text-white font-semibold'
-                          : 'bg-white hover:bg-emerald-50 text-stone-700 hover:text-emerald-800 border border-stone-300'
-                      }`}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>{isAccepted ? 'Authorized' : 'Authorize'}</span>
-                    </button>
+                  {/* Right action buttons & Status */}
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2.5 shrink-0">
+                    <div className="text-right">
+                      <span className="text-[10px] text-stone-400 block uppercase font-medium">Status</span>
+                      <span
+                        className={`text-xs font-bold px-2.5 py-0.5 rounded-full inline-block border ${
+                          isAccepted
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                            : isRejected
+                            ? 'bg-red-50 text-red-800 border-red-300'
+                            : 'bg-stone-100 text-stone-700 border-stone-300'
+                        }`}
+                      >
+                        {isAccepted ? 'Approved' : isRejected ? 'Declined' : 'Pending'}
+                      </span>
+                    </div>
 
-                    <button
-                      onClick={() => handleStatusChange(rec.id, 'REJECTED')}
-                      className={`px-3 py-1.5 rounded-xs text-xs font-medium transition-all cursor-pointer flex items-center space-x-1 ${
-                        isRejected
-                          ? 'bg-red-700 text-white font-semibold'
-                          : 'bg-white hover:bg-red-50 text-stone-600 hover:text-red-800 border border-stone-300'
-                      }`}
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      <span>{isRejected ? 'Declined' : 'Decline'}</span>
-                    </button>
+                    <div className="flex items-center space-x-1.5">
+                      <button
+                        onClick={() => handleApproveAction(rec.id)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
+                          isAccepted
+                            ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                            : 'bg-stone-900 hover:bg-stone-800 text-white'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-300" />
+                        <span>{isAccepted ? 'Revoke Approval' : 'Approve Action'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeclineAction(rec.id)}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center space-x-1 ${
+                          isRejected
+                            ? 'bg-stone-800 text-white'
+                            : 'bg-white hover:bg-stone-100 text-stone-600 border border-stone-300'
+                        }`}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>{isRejected ? 'Reset' : 'Decline'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
+
+                {/* Audit Trail Note if Approved */}
+                {isAccepted && rec.approvedBy && (
+                  <div className="mt-2.5 pt-2 border-t border-emerald-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-emerald-900">
+                    <div className="flex items-center space-x-1.5 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                      <span>Approved by: <strong>{rec.approvedBy}</strong></span>
+                      <span className="text-emerald-600">&bull;</span>
+                      <span>Timestamp: <strong>{rec.approvedAt}</strong></span>
+                    </div>
+                    <span className="font-mono text-[10px] text-emerald-700 bg-white/70 px-2 py-0.5 rounded border border-emerald-200">
+                      Ledger ID: #{rec.id}-AUTH-2026
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
+        </div>
+
+        {/* Action Audit Trail Summary Box */}
+        <div className="bg-[#faf9f6] p-4 rounded-xl border border-stone-200 space-y-2 mt-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-stone-900 uppercase tracking-wide">
+              Official Shift Audit Trail
+            </span>
+            <span className="text-[11px] font-mono text-stone-500">
+              {recommendations.filter((r) => r.status === 'ACCEPTED').length} Directive(s) Active
+            </span>
+          </div>
+          <div className="space-y-1.5 text-xs text-stone-600">
+            {recommendations.filter((r) => r.status === 'ACCEPTED').length === 0 ? (
+              <p className="italic text-stone-500 text-[11px]">No actions approved yet. Click 'Approve Action' above to authorize directives.</p>
+            ) : (
+              recommendations
+                .filter((r) => r.status === 'ACCEPTED')
+                .map((r) => (
+                  <div key={`audit-${r.id}`} className="flex items-center justify-between py-1 border-b border-stone-200 text-xs">
+                    <span className="font-medium text-stone-800">
+                      ✓ #{r.rank} {r.title} ({r.mineZone})
+                    </span>
+                    <span className="text-stone-500 font-mono text-[11px]">
+                      {r.approvedBy} &bull; {r.approvedAt}
+                    </span>
+                  </div>
+                ))
+            )}
+          </div>
         </div>
       </div>
 

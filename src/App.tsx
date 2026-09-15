@@ -18,7 +18,7 @@ import { EXPLORATION_TARGETS, DRILLHOLES } from './data/explorationData';
 import { ExplorationTarget, WorkflowStep } from './types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<MainTab>('overview');
+  const [activeTab, setActiveTab] = useState<MainTab>('landing');
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget>(EXPLORATION_TARGETS[0]);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
@@ -149,18 +149,6 @@ export default function App() {
         selectedTarget={selectedTarget}
         onNavigateToTab={(tab) => setActiveTab(tab as MainTab)}
       />
-
-      {/* Unobtrusive Floating Quick Trigger Button (when chat is closed) */}
-      {!isAiAssistantOpen && (
-        <button
-          onClick={() => setIsAiAssistantOpen(true)}
-          className="fixed bottom-5 right-5 z-40 flex items-center space-x-2 px-3.5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-full shadow-lg border border-stone-700/50 cursor-pointer text-xs font-medium transition-all hover:scale-105 active:scale-95 group"
-          title="Open MOIL Mining Assistant (Ctrl+K)"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
-          <span>Ask AI</span>
-        </button>
-      )}
 
       {/* Persistent Footer with Corporate Attribution & Scientific Honesty Disclaimer */}
       <footer className="bg-white border-t border-stone-200 px-4 py-3 text-xs text-stone-500 mt-auto">

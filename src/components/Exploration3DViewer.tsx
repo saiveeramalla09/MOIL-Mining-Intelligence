@@ -141,8 +141,8 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
 
     // 1. Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060913);
-    scene.fog = new THREE.FogExp2(0x080e1a, 0.0018);
+    scene.background = new THREE.Color(0x0d1117);
+    scene.fog = new THREE.FogExp2(0x0d1117, 0.0016);
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1500);
@@ -157,11 +157,11 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
       stencil: false,
       depth: true,
     });
-    renderer.setClearColor(0x060913, 1.0);
+    renderer.setClearColor(0x0d1117, 1.0);
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.15;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.style.display = 'block';
@@ -175,13 +175,13 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     }
     container.appendChild(renderer.domElement);
 
-    // 4. Photorealistic Environmental & Sun Lighting
-    // Natural Indian sky & ground ambient fill
-    const hemiLight = new THREE.HemisphereLight(0x90b8f8, 0x3d3024, 0.75);
+    // 4. Geological Lighting: Directional Sun, Ambient Sky & Subsurface Ore Illumination
+    // Subtle atmospheric blue-grey skylight with deep ground reflectance
+    const hemiLight = new THREE.HemisphereLight(0x475569, 0x1e293b, 0.85);
     scene.add(hemiLight);
 
-    // Primary Solar Directional Key Light (Cast realistic terrain shadows)
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.6);
+    // Primary Solar Directional Key Light (Cast crisp, realistic terrain shadows)
+    const sunLight = new THREE.DirectionalLight(0xfffbf0, 1.7);
     sunLight.position.set(130, 190, 110);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -195,13 +195,13 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     sunLight.shadow.bias = -0.0004;
     scene.add(sunLight);
 
-    // Secondary sky fill light
-    const skyFillLight = new THREE.DirectionalLight(0x38bdf8, 0.45);
+    // Secondary fill light for unlit geological facets
+    const skyFillLight = new THREE.DirectionalLight(0x334155, 0.55);
     skyFillLight.position.set(-110, 80, -100);
     scene.add(skyFillLight);
 
-    // Warm Subsurface Glow inside ore body
-    const subsurfaceGlow = new THREE.PointLight(0xf59e0b, 2.4, 380);
+    // Warm Geological Subsurface Ore Illumination (Restrained, realistic)
+    const subsurfaceGlow = new THREE.PointLight(0xd97706, 1.4, 320);
     subsurfaceGlow.position.set(0, -45, 0);
     scene.add(subsurfaceGlow);
 
@@ -231,10 +231,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
 
     // Contour Lines Wireframe Grid (overlay for CAD mode)
     const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
+      color: 0x475569,
       wireframe: true,
       transparent: true,
-      opacity: 0.18,
+      opacity: 0.2,
     });
     const terrainWire = new THREE.Mesh(terrainGeo, wireMat);
     terrainWire.rotation.x = -Math.PI / 2;
@@ -245,9 +245,9 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     // 6. Surface AI Prospectivity Halo Plane
     const heatGeo = new THREE.PlaneGeometry(190, 190, 24, 24);
     const heatMat = new THREE.MeshBasicMaterial({
-      color: 0x10b981,
+      color: 0x15803d,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.18,
       side: THREE.DoubleSide,
     });
     const prospectivityPlane = new THREE.Mesh(heatGeo, heatMat);
@@ -266,7 +266,7 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     // 9. Borehole Selection Ring Indicator
     const ringGeo = new THREE.RingGeometry(4.5, 6.2, 32);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b,
+      color: 0xb45309,
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.9,
@@ -279,10 +279,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     // 10. Spatial Confidence Bounding Box
     const confGeo = new THREE.BoxGeometry(180, 95, 140);
     const confMat = new THREE.MeshBasicMaterial({
-      color: 0x3b82f6,
+      color: 0x475569,
       wireframe: true,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.2,
     });
     const confidenceMesh = new THREE.Mesh(confGeo, confMat);
     confidenceMesh.position.set(0, -45, 0);
@@ -291,7 +291,7 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
     // 11. Subsurface Depth Grid Slices
     const depthGridGroup = new THREE.Group();
     [-50, -100, -150].forEach((d) => {
-      const grid = new THREE.GridHelper(240, 12, 0x1e293b, 0x0f172a);
+      const grid = new THREE.GridHelper(240, 12, 0x334155, 0x1e293b);
       grid.position.y = d * 0.45;
       depthGridGroup.add(grid);
     });
@@ -319,10 +319,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
       isDragging: false,
       isRightDragging: false,
       prevMouse: { x: 0, y: 0 },
-      rotation: { x: 0.55, y: -0.65 },
-      targetRotation: { x: 0.55, y: -0.65 },
-      zoom: 160,
-      targetZoom: 160,
+      rotation: { x: 0.48, y: -0.65 },
+      targetRotation: { x: 0.48, y: -0.65 },
+      zoom: 165,
+      targetZoom: 165,
       pan: { x: 0, y: 0 },
       targetPan: { x: 0, y: 0 },
     };
@@ -373,14 +373,14 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
         lastHoveredKey = currentKey;
         if (tooltipDotRef.current) {
           tooltipDotRef.current.className = `w-2 h-2 rounded-full ${
-            type === 'drillhole' ? 'bg-cyan-400' : 'bg-amber-400'
+            type === 'drillhole' ? 'bg-red-600' : 'bg-amber-700'
           }`;
         }
         if (tooltipTitleRef.current) tooltipTitleRef.current.textContent = title;
         if (tooltipSubtitleRef.current) tooltipSubtitleRef.current.textContent = subtitle;
         if (tooltipMetricsRef.current) {
           tooltipMetricsRef.current.innerHTML = metrics
-            .map((m) => `<div class="text-slate-200">${m}</div>`)
+            .map((m) => `<div class="text-stone-800">${m}</div>`)
             .join('');
         }
       }
@@ -704,19 +704,20 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
         let opacity = 0.25;
 
         if (blk.category === 'High-grade Ore') {
-          blockColor = 0xf59e0b; // Rich Manganese Amber-Gold
-          emissiveColor = 0xd97706;
-          emissiveIntensity = activeRenderMode === 'highgrade' ? 0.75 : 0.4;
+          blockColor = 0xb45309; // Rich Manganese Ore Amber-Brown
+          emissiveColor = 0x92400e;
+          emissiveIntensity = activeRenderMode === 'highgrade' ? 0.6 : 0.3;
           opacity = 0.94;
         } else if (blk.category === 'Medium-grade Ore') {
-          blockColor = 0x10b981; // Economic Emerald Ore
-          emissiveColor = 0x059669;
-          emissiveIntensity = 0.25;
+          blockColor = 0x15803d; // Economic Mineral Green Ore
+          emissiveColor = 0x14532d;
+          emissiveIntensity = 0.2;
           opacity = activeRenderMode === 'highgrade' ? 0.35 : 0.85;
         } else if (blk.category === 'Low-grade Mineralized') {
-          blockColor = 0x06b6d4; // Mineralized Cyan
+          blockColor = 0x78716c; // Weathered Slate-Schist
           opacity = activeRenderMode === 'highgrade' ? 0.1 : 0.55;
         } else {
+          blockColor = 0x94a3b8; // Waste Limestone Rock
           opacity = activeRenderMode === 'highgrade' ? 0.04 : 0.16;
         }
 
@@ -725,8 +726,8 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           color: blockColor,
           emissive: emissiveColor,
           emissiveIntensity,
-          roughness: 0.35,
-          metalness: blk.category === 'High-grade Ore' ? 0.55 : 0.15,
+          roughness: 0.4,
+          metalness: blk.category === 'High-grade Ore' ? 0.45 : 0.15,
           transparent: true,
           opacity,
           wireframe: activeRenderMode === 'wireframe',
@@ -746,10 +747,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
 
         // Edge highlights
         const edges = new THREE.EdgesGeometry(boxGeo);
-        const edgeColor = blk.category === 'High-grade Ore' ? 0xfef08a : 0x0f172a;
+        const edgeColor = blk.category === 'High-grade Ore' ? 0xd97706 : 0x57534e;
         const line = new THREE.LineSegments(
           edges,
-          new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.55 })
+          new THREE.LineBasicMaterial({ color: edgeColor, transparent: true, opacity: 0.45 })
         );
         boxMesh.add(line);
 
@@ -789,10 +790,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
 
         const interceptGeo = new THREE.CylinderGeometry(2.0, 2.0, intLen, 16);
         const interceptMat = new THREE.MeshStandardMaterial({
-          color: 0xef4444, // Red High-Grade Core
-          emissive: 0xdc2626,
-          emissiveIntensity: 0.8,
-          roughness: 0.2,
+          color: 0xb91c1c, // Mineralized Core Crimson Red
+          emissive: 0x7f1d1d,
+          emissiveIntensity: 0.5,
+          roughness: 0.3,
         });
         const interceptMesh = new THREE.Mesh(interceptGeo, interceptMat);
         interceptMesh.position.set(offsetX, intCenterY, offsetZ);
@@ -990,31 +991,31 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
       ref={containerRef}
       className={`relative w-full ${
         isFullscreen
-          ? 'fixed inset-0 z-[9999] w-screen h-screen bg-slate-950 border-0 rounded-none'
-          : 'h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#070b14] rounded-xs border border-[#182438]'
-      } overflow-hidden flex flex-col select-none shadow-2xl transition-all`}
+          ? 'fixed inset-0 z-[9999] w-screen h-screen bg-[#0d1117] border-0 rounded-none'
+          : 'h-[540px] sm:h-[600px] lg:h-[650px] xl:h-[700px] bg-[#0d1117] rounded-2xl border border-stone-300/80 shadow-xs'
+      } overflow-hidden flex flex-col select-none transition-all`}
     >
       {/* 1. TOP INDUSTRIAL COMMAND TOOLBAR */}
-      <div className="px-3 py-2 bg-[#090e1a]/95 border-b border-[#182438] flex flex-wrap items-center justify-between gap-2 z-30 backdrop-blur-md">
+      <div className="px-3 py-2 bg-white/95 border-b border-stone-200 text-stone-900 flex flex-wrap items-center justify-between gap-2 z-30 backdrop-blur-md">
         
-        {/* Left: Target Selector & Mode Indicator */}
+        {/* Left: Target Selector & Modelled Subsurface Interpretation Label */}
         <div className="flex items-center space-x-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></div>
 
           {/* Target Zone Selector Dropdown */}
           <div className="relative dropdown-container">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'target' ? null : 'target')}
-              className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#0f172a] hover:bg-[#172338] text-slate-100 rounded-xs border border-[#22324c] text-xs font-mono font-bold transition-colors cursor-pointer"
+              className="flex items-center space-x-1.5 px-2.5 py-1 bg-stone-50 hover:bg-stone-100 text-stone-900 rounded-lg border border-stone-300/80 text-xs font-mono font-bold transition-colors cursor-pointer shadow-2xs"
             >
-              <Target className="w-3.5 h-3.5 text-amber-400" />
+              <Target className="w-3.5 h-3.5 text-amber-700" />
               <span>{target.code}: {target.name}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-stone-500" />
             </button>
 
             {openDropdown === 'target' && (
-              <div className="absolute left-0 mt-1.5 w-72 bg-[#0a101d] border border-[#1d2a42] rounded-xs shadow-2xl py-1 z-50 backdrop-blur-xl">
-                <div className="px-3 py-1.5 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#162238]">
+              <div className="absolute left-0 mt-1.5 w-72 bg-white border border-stone-200 rounded-xl shadow-xl py-1 z-50 backdrop-blur-xl text-stone-900">
+                <div className="px-3 py-1.5 text-[10px] font-mono text-stone-500 uppercase tracking-wider border-b border-stone-100">
                   Select Exploration Target (3D)
                 </div>
                 <div className="max-h-60 overflow-y-auto">
@@ -1027,19 +1028,19 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                       }}
                       className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs font-mono transition-colors cursor-pointer ${
                         t.id === target.id
-                          ? 'bg-amber-500/20 text-amber-300 font-bold border-l-2 border-amber-500'
-                          : 'text-slate-300 hover:bg-[#121c30]'
+                          ? 'bg-amber-50 text-amber-900 font-bold border-l-2 border-amber-700'
+                          : 'text-stone-700 hover:bg-stone-50'
                       }`}
                     >
                       <div>
                         <div>{t.code}: {t.name}</div>
-                        <div className="text-[10px] text-slate-400 font-sans">{t.depositStyle}</div>
+                        <div className="text-[10px] text-stone-500 font-sans">{t.depositStyle}</div>
                       </div>
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded-xs font-bold border ${
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-bold border ${
                           t.prospectivity === 'HIGH'
-                            ? 'bg-[#071d13] text-emerald-400 border-emerald-500/40'
-                            : 'bg-[#221606] text-amber-400 border-amber-500/40'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-amber-50 text-amber-800 border-amber-200'
                         }`}
                       >
                         {t.prospectivity}
@@ -1051,11 +1052,13 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
             )}
           </div>
 
-          <span className="text-slate-700 hidden sm:inline">|</span>
-          <span className="text-[11px] font-mono text-slate-400 hidden sm:inline flex items-center space-x-1">
-            <Mountain className="w-3.5 h-3.5 text-emerald-400" />
-            <span>REAL-LIFE TERRAIN &bull; DEM PBR</span>
-          </span>
+          <span className="text-stone-300 hidden sm:inline">|</span>
+
+          {/* Modelled Subsurface Interpretation Label */}
+          <div className="hidden sm:flex items-center space-x-1.5 px-2 py-0.5 rounded-md bg-stone-100 border border-stone-200 text-[10px] font-mono text-stone-700 tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+            <span className="font-semibold text-stone-800">MODELLED SUBSURFACE INTERPRETATION</span>
+          </div>
         </div>
 
         {/* Right: Camera Angle, Render Shader, Terrain Opacity, Grade Cutoff, Layers & Fullscreen */}
@@ -1065,17 +1068,17 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           <div className="relative dropdown-container">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'camera' ? null : 'camera')}
-              className="flex items-center space-x-1 px-2 py-1 bg-[#0e1626] hover:bg-[#162238] text-slate-200 rounded-xs text-xs font-mono transition-colors border border-[#1a2840] cursor-pointer"
+              className="flex items-center space-x-1 px-2 py-1 bg-stone-50 hover:bg-stone-100 text-stone-800 rounded-lg text-xs font-mono transition-colors border border-stone-300/80 cursor-pointer shadow-2xs"
               title="Camera View Preset"
             >
-              <Compass className="w-3.5 h-3.5 text-sky-400" />
+              <Compass className="w-3.5 h-3.5 text-stone-600" />
               <span className="capitalize">{cameraPreset.replace('_', ' ')}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-stone-500" />
             </button>
 
             {openDropdown === 'camera' && (
-              <div className="absolute right-0 mt-1.5 w-56 bg-[#0a101d] border border-[#1d2a42] rounded-xs shadow-2xl py-1 z-50 backdrop-blur-xl">
-                <div className="px-3 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#162238]">
+              <div className="absolute right-0 mt-1.5 w-56 bg-white border border-stone-200 rounded-xl shadow-xl py-1 z-50 backdrop-blur-xl text-stone-800">
+                <div className="px-3 py-1 text-[10px] font-mono text-stone-500 uppercase tracking-wider border-b border-stone-100">
                   Camera Perspective
                 </div>
                 {[
@@ -1089,11 +1092,11 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                     key={item.id}
                     onClick={() => applyCameraPreset(item.id as CameraPreset)}
                     className={`w-full px-3 py-1.5 text-left text-xs font-mono flex items-center justify-between cursor-pointer ${
-                      cameraPreset === item.id ? 'bg-sky-500/20 text-sky-300 font-bold' : 'text-slate-300 hover:bg-[#121c30]'
+                      cameraPreset === item.id ? 'bg-amber-50 text-amber-900 font-bold' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <span>{item.label}</span>
-                    {cameraPreset === item.id && <Check className="w-3.5 h-3.5 text-sky-400" />}
+                    {cameraPreset === item.id && <Check className="w-3.5 h-3.5 text-amber-700" />}
                   </button>
                 ))}
               </div>
@@ -1104,17 +1107,17 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           <div className="relative dropdown-container">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'render' ? null : 'render')}
-              className="flex items-center space-x-1 px-2 py-1 bg-[#0e1626] hover:bg-[#162238] text-slate-200 rounded-xs text-xs font-mono transition-colors border border-[#1a2840] cursor-pointer"
+              className="flex items-center space-x-1 px-2 py-1 bg-stone-50 hover:bg-stone-100 text-stone-800 rounded-lg text-xs font-mono transition-colors border border-stone-300/80 cursor-pointer shadow-2xs"
               title="Shading & Visibility Mode"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-700" />
               <span className="capitalize">{renderMode === 'pbr' ? 'Realistic Terrain' : `${renderMode} Mode`}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-stone-500" />
             </button>
 
             {openDropdown === 'render' && (
-              <div className="absolute right-0 mt-1.5 w-64 bg-[#0a101d] border border-[#1d2a42] rounded-xs shadow-2xl py-1 z-50 backdrop-blur-xl">
-                <div className="px-3 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#162238]">
+              <div className="absolute right-0 mt-1.5 w-64 bg-white border border-stone-200 rounded-xl shadow-xl py-1 z-50 backdrop-blur-xl text-stone-800">
+                <div className="px-3 py-1 text-[10px] font-mono text-stone-500 uppercase tracking-wider border-b border-stone-100">
                   Render Shading Preset
                 </div>
                 {[
@@ -1130,14 +1133,14 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                       setOpenDropdown(null);
                     }}
                     className={`w-full px-3 py-2 text-left text-xs font-mono flex flex-col cursor-pointer ${
-                      renderMode === item.id ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-300 hover:bg-[#121c30]'
+                      renderMode === item.id ? 'bg-amber-50 text-amber-900 font-bold' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{item.label}</span>
-                      {renderMode === item.id && <Check className="w-3.5 h-3.5 text-amber-400" />}
+                      {renderMode === item.id && <Check className="w-3.5 h-3.5 text-amber-700" />}
                     </div>
-                    <span className="text-[10px] text-slate-500">{item.desc}</span>
+                    <span className="text-[10px] text-stone-500">{item.desc}</span>
                   </button>
                 ))}
               </div>
@@ -1145,8 +1148,8 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           </div>
 
           {/* Realistic Terrain Opacity Quick Controller */}
-          <div className="hidden md:flex items-center space-x-1.5 px-2 py-0.5 bg-[#0a101d] rounded-xs border border-[#182438] text-[10px] font-mono text-slate-300">
-            <span className="text-slate-400">SURFACE:</span>
+          <div className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 bg-stone-50 rounded-lg border border-stone-200 text-[10px] font-mono text-stone-700 shadow-2xs">
+            <span className="text-stone-500">SURFACE:</span>
             <input
               type="range"
               min="0"
@@ -1161,27 +1164,27 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                   setRenderMode('pbr');
                 }
               }}
-              className="w-16 h-1 bg-slate-800 rounded-xs appearance-none cursor-pointer accent-amber-500"
+              className="w-16 h-1.5 bg-stone-200 rounded appearance-none cursor-pointer accent-amber-700"
               title="Surface Terrain Opacity (0% = Ore Only, 100% = Full Realistic Surface Terrain)"
             />
-            <span className="w-7 text-right font-bold text-amber-400">{Math.round(terrainOpacity * 100)}%</span>
+            <span className="w-7 text-right font-bold text-stone-900">{Math.round(terrainOpacity * 100)}%</span>
           </div>
 
           {/* Grade Cutoff Dropdown */}
           <div className="relative dropdown-container">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'grade' ? null : 'grade')}
-              className="flex items-center space-x-1 px-2 py-1 bg-[#0e1626] hover:bg-[#162238] text-slate-200 rounded-xs text-xs font-mono transition-colors border border-[#1a2840] cursor-pointer"
+              className="flex items-center space-x-1 px-2 py-1 bg-stone-50 hover:bg-stone-100 text-stone-800 rounded-lg text-xs font-mono transition-colors border border-stone-300/80 cursor-pointer shadow-2xs"
               title="Mn Grade Cutoff Filter"
             >
-              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+              <Sliders className="w-3.5 h-3.5 text-emerald-700" />
               <span>{gradeCutoff === 0 ? 'All Grades' : `≥${gradeCutoff}% Mn`}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-stone-500" />
             </button>
 
             {openDropdown === 'grade' && (
-              <div className="absolute right-0 mt-1.5 w-56 bg-[#0a101d] border border-[#1d2a42] rounded-xs shadow-2xl py-1 z-50 backdrop-blur-xl">
-                <div className="px-3 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#162238]">
+              <div className="absolute right-0 mt-1.5 w-56 bg-white border border-stone-200 rounded-xl shadow-xl py-1 z-50 backdrop-blur-xl text-stone-800">
+                <div className="px-3 py-1 text-[10px] font-mono text-stone-500 uppercase tracking-wider border-b border-stone-100">
                   Filter Blocks by Grade
                 </div>
                 {[
@@ -1197,11 +1200,11 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                       setOpenDropdown(null);
                     }}
                     className={`w-full px-3 py-1.5 text-left text-xs font-mono flex items-center justify-between cursor-pointer ${
-                      gradeCutoff === item.cutoff ? 'bg-emerald-500/20 text-emerald-300 font-bold' : 'text-slate-300 hover:bg-[#121c30]'
+                      gradeCutoff === item.cutoff ? 'bg-emerald-50 text-emerald-900 font-bold' : 'text-stone-700 hover:bg-stone-50'
                     }`}
                   >
                     <span>{item.label}</span>
-                    {gradeCutoff === item.cutoff && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                    {gradeCutoff === item.cutoff && <Check className="w-3.5 h-3.5 text-emerald-700" />}
                   </button>
                 ))}
               </div>
@@ -1212,30 +1215,30 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           <div className="relative dropdown-container">
             <button
               onClick={() => setOpenDropdown(openDropdown === 'layers' ? null : 'layers')}
-              className="flex items-center space-x-1 px-2 py-1 bg-[#0e1626] hover:bg-[#162238] text-slate-200 rounded-xs text-xs font-mono transition-colors border border-[#1a2840] cursor-pointer"
+              className="flex items-center space-x-1 px-2 py-1 bg-stone-50 hover:bg-stone-100 text-stone-800 rounded-lg text-xs font-mono transition-colors border border-stone-300/80 cursor-pointer shadow-2xs"
             >
-              <Layers3 className="w-3.5 h-3.5 text-indigo-400" />
+              <Layers3 className="w-3.5 h-3.5 text-stone-600" />
               <span>Layers ({Object.values(layers).filter(Boolean).length})</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <ChevronDown className="w-3 h-3 text-stone-500" />
             </button>
 
             {openDropdown === 'layers' && (
-              <div className="absolute right-0 mt-1.5 w-60 bg-[#0a101d] border border-[#1d2a42] rounded-xs shadow-2xl p-2 z-50 backdrop-blur-xl">
-                <div className="px-1 py-1 text-[10px] font-mono text-slate-400 uppercase tracking-wider border-b border-[#162238] mb-1">
+              <div className="absolute right-0 mt-1.5 w-60 bg-white border border-stone-200 rounded-xl shadow-xl p-2 z-50 backdrop-blur-xl text-stone-800">
+                <div className="px-1 py-1 text-[10px] font-mono text-stone-500 uppercase tracking-wider border-b border-stone-100 mb-1">
                   Toggle 3D Subsurface Layers
                 </div>
                 <div className="space-y-1 text-xs font-mono">
                   {[
-                    { key: 'terrain', label: 'Realistic DEM Surface', color: 'bg-emerald-500' },
-                    { key: 'prospectivity', label: 'AI Prospectivity Halo', color: 'bg-emerald-400' },
-                    { key: 'conceptualBlocks', label: 'Block Model (Ore Body)', color: 'bg-amber-400' },
-                    { key: 'drillholes', label: 'Drill Hole Traces & Rigs', color: 'bg-cyan-400' },
-                    { key: 'confidence', label: 'Confidence Bounding Box', color: 'bg-blue-400' },
-                    { key: 'depthGrid', label: 'Depth Reference Slices', color: 'bg-indigo-400' },
+                    { key: 'terrain', label: 'Realistic DEM Surface', color: 'bg-emerald-600' },
+                    { key: 'prospectivity', label: 'AI Prospectivity Halo', color: 'bg-emerald-700' },
+                    { key: 'conceptualBlocks', label: 'Block Model (Ore Body)', color: 'bg-amber-700' },
+                    { key: 'drillholes', label: 'Drill Hole Traces & Rigs', color: 'bg-stone-600' },
+                    { key: 'confidence', label: 'Confidence Bounding Box', color: 'bg-stone-400' },
+                    { key: 'depthGrid', label: 'Depth Reference Slices', color: 'bg-stone-300' },
                   ].map((layer) => (
                     <label
                       key={layer.key}
-                      className="flex items-center justify-between px-2 py-1 rounded-xs hover:bg-[#121c30] cursor-pointer text-slate-200"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-stone-50 cursor-pointer text-stone-700"
                     >
                       <div className="flex items-center space-x-2">
                         <span className={`w-2 h-2 rounded-full ${layer.color}`} />
@@ -1245,7 +1248,7 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                         type="checkbox"
                         checked={layers[layer.key as keyof typeof layers]}
                         onChange={() => toggleLayer(layer.key as keyof typeof layers)}
-                        className="rounded-xs border-[#1d2a42] bg-[#060a14] text-amber-500 focus:ring-0 cursor-pointer"
+                        className="rounded border-stone-300 text-amber-700 focus:ring-0 cursor-pointer accent-amber-700"
                       />
                     </label>
                   ))}
@@ -1257,14 +1260,14 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-xs text-xs font-mono font-bold transition-all cursor-pointer border ${
+            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border shadow-2xs ${
               isFullscreen
-                ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md ring-1 ring-amber-400'
-                : 'bg-[#0e1626] hover:bg-[#162238] text-slate-200 hover:text-white border-[#1a2840]'
+                ? 'bg-amber-700 text-white border-amber-800 shadow-xs'
+                : 'bg-stone-900 hover:bg-stone-800 text-white border-stone-900'
             }`}
             title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Open 3D Map in Fullscreen'}
           >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-amber-400" />}
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-amber-300" />}
             <span>{isFullscreen ? 'EXIT' : 'FULLSCREEN'}</span>
           </button>
         </div>
@@ -1277,14 +1280,14 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
         <div ref={mountRef} className="absolute inset-0 w-full h-full overflow-hidden" />
 
         {/* 3D Navigation Controls */}
-        <div className="absolute top-3 left-3 z-20 flex flex-col space-y-1 bg-[#090e1a]/95 p-1 rounded-xs border border-[#182438] shadow-2xl backdrop-blur-md">
+        <div className="absolute top-3 left-3 z-20 flex flex-col space-y-1 bg-white/95 p-1 rounded-xl border border-stone-300/80 shadow-md backdrop-blur-md text-stone-700">
           <button
             onClick={() => {
               if (sceneStateRef.current) {
                 sceneStateRef.current.targetZoom = Math.max(35, sceneStateRef.current.targetZoom - 25);
               }
             }}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-[#131d30] rounded-xs transition-colors cursor-pointer"
+            className="p-1.5 text-stone-700 hover:text-stone-950 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
             title="Zoom In"
           >
             <ZoomIn className="w-4 h-4" />
@@ -1295,32 +1298,32 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                 sceneStateRef.current.targetZoom = Math.min(360, sceneStateRef.current.targetZoom + 25);
               }
             }}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-[#131d30] rounded-xs transition-colors cursor-pointer"
+            className="p-1.5 text-stone-700 hover:text-stone-950 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
             title="Zoom Out"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={resetCamera}
-            className="p-1.5 text-slate-300 hover:text-white hover:bg-[#131d30] rounded-xs transition-colors cursor-pointer"
+            className="p-1.5 text-stone-700 hover:text-stone-950 hover:bg-stone-100 rounded-lg transition-colors cursor-pointer"
             title="Reset to 3D Orbit"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          <div className="pt-1 border-t border-[#182438] text-[8px] font-mono text-center text-slate-400">
+          <div className="pt-1 border-t border-stone-200 text-[8px] font-mono text-center text-stone-500">
             ORBIT
           </div>
         </div>
 
         {/* Topographic Elevation & Stratigraphic Reference */}
-        <div className="absolute top-3 left-14 z-20 bg-[#090e1a]/90 px-2.5 py-1.5 rounded-xs border border-[#182438] text-[9px] font-mono text-slate-400 backdrop-blur-xs flex flex-col space-y-1">
-          <div className="flex items-center space-x-1.5 text-slate-200 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <div className="absolute top-3 left-14 z-20 bg-white/95 px-2.5 py-1.5 rounded-xl border border-stone-300/80 text-[9px] font-mono text-stone-600 backdrop-blur-md flex flex-col space-y-1 shadow-md">
+          <div className="flex items-center space-x-1.5 text-stone-900 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
             <span>+25m to -35m Terraced Pit</span>
           </div>
-          <div className="pl-2 border-l border-[#1d2a42] space-y-0.5 text-slate-400">
+          <div className="pl-2 border-l border-stone-300 space-y-0.5 text-stone-500">
             <div>-50m Saprolite Floor</div>
-            <div className="text-amber-300 font-semibold">-100m Main Manganese Lode</div>
+            <div className="text-amber-800 font-semibold">-100m Main Manganese Lode</div>
             <div>-150m Lower Gondite Footwall</div>
             <div>-200m Deep Scout Intercept</div>
           </div>
@@ -1331,41 +1334,41 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
           <div className="flex items-center space-x-1.5">
             <button
               onClick={() => setIsInspectorOpen(!isInspectorOpen)}
-              className="flex items-center space-x-2 px-3 py-1.5 bg-[#090e1a]/95 hover:bg-[#131d30] border border-[#182438] hover:border-amber-500/70 rounded-xs text-xs font-mono text-slate-100 shadow-2xl backdrop-blur-xl transition-all cursor-pointer group"
+              className="flex items-center space-x-2 px-3 py-1.5 bg-white/95 hover:bg-stone-50 border border-stone-300/80 hover:border-amber-700 rounded-xl text-xs font-mono text-stone-900 shadow-md backdrop-blur-xl transition-all cursor-pointer group"
               title={isInspectorOpen ? "Collapse Inspector" : "Expand Borehole & Subsurface Inspector"}
             >
               <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="font-bold text-amber-400 tracking-wide text-[10px]">
+                <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse" />
+                <span className="font-bold text-amber-800 tracking-wide text-[10px]">
                   BOREHOLE INSPECTOR
                 </span>
               </div>
               {selectedDh && (
-                <span className="px-1.5 py-0.5 rounded-xs bg-[#060a14] text-sky-300 text-[9px] font-bold border border-[#182438]">
+                <span className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-800 text-[9px] font-bold border border-stone-200">
                   {selectedDh.code} &bull; {selectedDh.mnGradePct}% Mn
                 </span>
               )}
               {isInspectorOpen ? (
-                <ChevronUp className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400" />
+                <ChevronUp className="w-3.5 h-3.5 text-stone-500 group-hover:text-amber-700" />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-stone-500 group-hover:text-amber-700" />
               )}
             </button>
           </div>
 
           {/* Inspector Panel */}
           {isInspectorOpen && (
-            <div className="mt-1.5 w-80 sm:w-92 bg-[#090e1a]/98 p-3.5 rounded-xs border border-[#1d2a42] shadow-2xl backdrop-blur-xl flex flex-col max-h-[calc(100vh-160px)] sm:max-h-[510px] overflow-y-auto">
-              <div className="pb-2.5 border-b border-[#182438] mb-2.5 flex items-center justify-between">
+            <div className="mt-1.5 w-80 sm:w-92 bg-white/98 p-3.5 rounded-2xl border border-stone-200 shadow-2xl backdrop-blur-xl flex flex-col max-h-[calc(100vh-160px)] sm:max-h-[510px] overflow-y-auto text-stone-900">
+              <div className="pb-2.5 border-b border-stone-200 mb-2.5 flex items-center justify-between">
                 <div className="flex items-center space-x-1.5">
-                  <Crosshair className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+                  <Crosshair className="w-3.5 h-3.5 text-amber-700" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 font-bold">
                     BOREHOLE & LITHOLOGY PROFILE
                   </span>
                 </div>
                 <button
                   onClick={() => setIsInspectorOpen(false)}
-                  className="p-1 rounded-xs bg-[#060a14] hover:bg-[#131d30] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -1382,10 +1385,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                       if (onSelectDrillhole) onSelectDrillhole(dh);
                     }
                   }}
-                  className="w-full bg-[#060a14] border border-[#182438] rounded-xs px-2.5 py-1.5 text-xs font-mono text-slate-100 font-bold focus:outline-hidden focus:border-amber-500 cursor-pointer"
+                  className="w-full bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs font-mono text-stone-900 font-bold focus:outline-hidden focus:border-amber-700 cursor-pointer shadow-2xs"
                 >
                   {targetDrillholes.map((dh) => (
-                    <option key={dh.id} value={dh.id}>
+                    <option key={dh.id} value={dh.id} className="bg-white text-stone-900">
                       {dh.code} &bull; {dh.depthMeters}m ({dh.mnGradePct}% Mn - {dh.mineralizedInterval[0]}m-{dh.mineralizedInterval[1]}m)
                     </option>
                   ))}
@@ -1395,53 +1398,53 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
               {selectedDh ? (
                 <div className="space-y-2 text-xs">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2 bg-[#060a14] rounded-xs border border-[#182438]">
-                      <span className="text-[9px] text-slate-400 block font-mono">TOTAL DEPTH</span>
-                      <span className="font-mono font-bold text-slate-100 text-sm">{selectedDh.depthMeters} m</span>
+                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200">
+                      <span className="text-[9px] text-stone-500 block font-mono">TOTAL DEPTH</span>
+                      <span className="font-mono font-bold text-stone-900 text-sm">{selectedDh.depthMeters} m</span>
                     </div>
-                    <div className="p-2 bg-[#060a14] rounded-xs border border-[#182438]">
-                      <span className="text-[9px] text-slate-400 block font-mono">AVG ASSAY GRADE</span>
-                      <span className="font-mono font-bold text-emerald-400 text-sm">{selectedDh.mnGradePct}% Mn</span>
+                    <div className="p-2 bg-stone-50 rounded-lg border border-stone-200">
+                      <span className="text-[9px] text-stone-500 block font-mono">AVG ASSAY GRADE</span>
+                      <span className="font-mono font-bold text-emerald-800 text-sm">{selectedDh.mnGradePct}% Mn</span>
                     </div>
                   </div>
 
-                  <div className="p-2.5 bg-[#060a14] rounded-xs border border-[#182438]">
+                  <div className="p-2.5 bg-red-50/50 rounded-lg border border-red-200/80">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-slate-400 text-[11px]">Mineralized Intercept:</span>
-                      <span className="font-mono font-bold text-red-400 text-xs">
+                      <span className="text-stone-600 text-[11px]">Mineralized Intercept:</span>
+                      <span className="font-mono font-bold text-red-700 text-xs">
                         {selectedDh.mineralizedInterval[0]}m &ndash; {selectedDh.mineralizedInterval[1]}m
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-slate-400">Lode True Thickness:</span>
-                      <span className="font-semibold text-slate-200">
+                      <span className="text-stone-500">Lode True Thickness:</span>
+                      <span className="font-semibold text-stone-800">
                         {(selectedDh.mineralizedInterval[1] - selectedDh.mineralizedInterval[0]).toFixed(1)} m
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] font-mono mt-1 pt-1 border-t border-[#141c2c]">
-                      <span className="text-slate-400">Fe Contaminant:</span>
-                      <span className="text-slate-300">{selectedDh.feGradePct}% Fe</span>
+                    <div className="flex items-center justify-between text-[10px] font-mono mt-1 pt-1 border-t border-red-100">
+                      <span className="text-stone-500">Fe Contaminant:</span>
+                      <span className="text-stone-700">{selectedDh.feGradePct}% Fe</span>
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-slate-400 block text-[9px] uppercase font-mono mb-1">Lithology Profile</span>
-                    <p className="text-[10px] text-slate-300 leading-relaxed bg-[#060a14] p-2 rounded-xs border border-[#182438] font-sans">
+                    <span className="text-stone-500 block text-[9px] uppercase font-mono mb-1">Lithology Profile</span>
+                    <p className="text-[10px] text-stone-700 leading-relaxed bg-stone-50 p-2 rounded-lg border border-stone-200 font-sans">
                       {selectedDh.lithology}
                     </p>
                   </div>
 
                   {selectedBlock && (
-                    <div className="mt-2 p-2 bg-amber-950/30 border border-amber-500/40 rounded-xs">
+                    <div className="mt-2 p-2 bg-amber-50/80 border border-amber-300 rounded-lg">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-mono font-bold text-amber-300 text-xs">Block {selectedBlock.id}</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-xs bg-amber-500/20 text-amber-300 font-mono">
+                        <span className="font-mono font-bold text-amber-900 text-xs">Block {selectedBlock.id}</span>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 font-mono font-semibold">
                           {selectedBlock.confidence}
                         </span>
                       </div>
-                      <div className="grid grid-cols-2 gap-1 text-[9px] font-mono text-slate-300">
+                      <div className="grid grid-cols-2 gap-1 text-[9px] font-mono text-stone-700">
                         <div>Level: -{selectedBlock.z} m</div>
-                        <div>Grade: <span className="font-bold text-emerald-400">{selectedBlock.gradeMnPct}% Mn</span></div>
+                        <div>Grade: <span className="font-bold text-emerald-800">{selectedBlock.gradeMnPct}% Mn</span></div>
                         <div>Tonnage: {selectedBlock.tonnes.toLocaleString()} t</div>
                         <div>Type: {selectedBlock.category}</div>
                       </div>
@@ -1451,10 +1454,10 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
               ) : null}
 
               {/* Depth Slicing Plane Slider */}
-              <div className="mt-3 pt-2.5 border-t border-[#182438]">
-                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
+              <div className="mt-3 pt-2.5 border-t border-stone-200">
+                <div className="flex items-center justify-between text-[10px] font-mono text-stone-600 mb-1">
                   <span>Depth Cutaway Slicing</span>
-                  <span className="text-amber-400 font-bold">-{maxDepthFilter}m</span>
+                  <span className="text-amber-800 font-bold">-{maxDepthFilter}m</span>
                 </div>
                 <input
                   type="range"
@@ -1463,15 +1466,15 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
                   step="10"
                   value={maxDepthFilter}
                   onChange={(e) => setMaxDepthFilter(Number(e.target.value))}
-                  className="w-full h-1.5 bg-[#060a14] rounded-xs appearance-none cursor-pointer accent-amber-500"
+                  className="w-full h-1.5 bg-stone-200 rounded appearance-none cursor-pointer accent-amber-700"
                 />
               </div>
 
               {/* Action Link */}
-              <div className="mt-3 pt-2 border-t border-[#182438] space-y-1.5">
+              <div className="mt-3 pt-2 border-t border-stone-200 space-y-1.5">
                 <button
                   onClick={onViewResource}
-                  className="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+                  className="w-full py-2 bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs rounded-lg flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-xs"
                 >
                   <span>ESTIMATE GEOLOGICAL RESOURCE</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -1482,35 +1485,35 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
         </div>
 
         {/* Bottom Realistic Satellite & Legend Readout */}
-        <div className="absolute bottom-3 left-3 z-20 bg-[#090e1a]/95 px-3 py-1.5 rounded-xs border border-[#182438] text-[9px] font-mono text-slate-300 flex flex-wrap items-center gap-3 backdrop-blur-md shadow-xl">
+        <div className="absolute bottom-3 left-3 z-20 bg-white/95 px-3 py-1.5 rounded-xl border border-stone-300/80 text-[9px] font-mono text-stone-700 flex flex-wrap items-center gap-3 backdrop-blur-md shadow-md">
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-xs bg-[#24301d] border border-[#3e552d]"></span>
+            <span className="w-2.5 h-2.5 rounded bg-[#3f4f34] border border-[#2b3823]"></span>
             <span>Natural Forest Canopy</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-xs bg-[#8b4332] border border-[#a65642]"></span>
+            <span className="w-2.5 h-2.5 rounded bg-[#8b4b39] border border-[#6b3527]"></span>
             <span>Laterite Soil</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-xs bg-[#1a1e26] border border-[#384252]"></span>
+            <span className="w-2.5 h-2.5 rounded bg-[#475569] border border-[#334155]"></span>
             <span>Quarry Pit & Ore Horizon</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-xs bg-amber-500"></span>
+            <span className="w-2.5 h-2.5 rounded bg-[#b45309]"></span>
             <span>High-Grade Ore (&gt;24% Mn)</span>
           </div>
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-xs bg-red-500"></span>
+            <span className="w-2.5 h-2.5 rounded bg-[#b91c1c]"></span>
             <span>Core Intercept</span>
           </div>
-          <div className="flex items-center space-x-1 text-slate-500 hidden lg:inline">
+          <div className="flex items-center space-x-1 text-stone-500 hidden lg:inline">
             <span>&bull; Drag: Orbit | Right-Drag: Pan | Wheel: Zoom</span>
           </div>
         </div>
 
         {/* Datum / Coordinates Stamp */}
-        <div className="absolute bottom-3 right-3 z-20 bg-[#090e1a]/95 px-2.5 py-1 rounded-xs border border-[#182438] text-[9px] font-mono text-slate-400 backdrop-blur-md flex items-center space-x-2">
-          <div className="w-3 h-3 flex items-center justify-center font-bold text-red-400 border border-red-500/50 rounded-full text-[7px]">
+        <div className="absolute bottom-3 right-3 z-20 bg-white/95 px-2.5 py-1 rounded-xl border border-stone-300/80 text-[9px] font-mono text-stone-600 backdrop-blur-md flex items-center space-x-2 shadow-md">
+          <div className="w-3 h-3 flex items-center justify-center font-bold text-red-600 border border-red-400 rounded-full text-[7px]">
             N
           </div>
           <span>UTM Zone 44N &bull; WGS84</span>
@@ -1519,14 +1522,14 @@ export const Exploration3DViewerComponent: React.FC<Exploration3DViewerProps> = 
         {/* Direct DOM Hover Tooltip (Zero React re-render overhead) */}
         <div
           ref={tooltipRef}
-          className="absolute top-0 left-0 z-40 pointer-events-none bg-[#070b14]/98 border border-[#1d2a42] rounded-xs p-2 shadow-2xl text-xs font-mono backdrop-blur-md max-w-xs transition-opacity duration-75 opacity-0"
+          className="absolute top-0 left-0 z-40 pointer-events-none bg-white/98 border border-stone-300 rounded-xl p-2.5 shadow-xl text-xs font-mono backdrop-blur-md max-w-xs transition-opacity duration-75 opacity-0 text-stone-900"
           style={{ willChange: 'transform', display: 'none' }}
         >
-          <div className="flex items-center space-x-1.5 border-b border-[#141c2c] pb-1 mb-1">
-            <div ref={tooltipDotRef} className="w-2 h-2 rounded-full bg-amber-400" />
-            <span ref={tooltipTitleRef} className="font-bold text-slate-100 text-xs" />
+          <div className="flex items-center space-x-1.5 border-b border-stone-200 pb-1 mb-1">
+            <div ref={tooltipDotRef} className="w-2 h-2 rounded-full bg-amber-700" />
+            <span ref={tooltipTitleRef} className="font-bold text-stone-900 text-xs" />
           </div>
-          <div ref={tooltipSubtitleRef} className="text-[9px] text-slate-400 mb-1" />
+          <div ref={tooltipSubtitleRef} className="text-[9px] text-stone-500 mb-1" />
           <div ref={tooltipMetricsRef} className="space-y-0.5 text-[10px]" />
         </div>
       </div>
